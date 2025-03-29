@@ -1281,6 +1281,9 @@ class RoomPipeline{
                 ]
             ],
             [
+                "$unwind": "$users"
+            ],
+            [
                 "$project": [
                     "_id": 0,
                     "id": ["$toString": "$_id"],
