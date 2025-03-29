@@ -1195,7 +1195,17 @@ class RoomPipeline{
                             ]
                         ]
                     ],0]
-                ]
+                ],
+                "otherUser": [
+                    "$arrayElemAt": [[
+                        "$filter" : [
+                            "input": "$participants",
+                            "cond": [
+                                "$ne" : ["$$this.userId", .objectID(userId)]
+                            ]
+                        ]
+                    ],0]
+                ],
             ]],
             [
                 "$match": [
@@ -1274,20 +1284,18 @@ class RoomPipeline{
             ],
             [
                 "$lookup": [
-                    "from": "users",
-                    "localField": "participants.userId",
+                    "from": "users" ,
+                    "localField": "otherUser.userId",
                     "foreignField": "_id",
-                    "as": "users"
+                    "as": "otherUsers"
                 ]
             ],
-            [
-                "$unwind": "$users"
-            ],
+            ["$unwind": "$otherUsers"],
             [
                 "$project": [
                     "_id": 0,
                     "id": ["$toString": "$_id"],
-                    "content": 1,
+                    "content": "$otherUsers.name",
                     "description": 1,
                     "type": 1,
                     "hostId": ["$toString": "$hostId"],
@@ -1319,9 +1327,9 @@ class RoomPipeline{
                         .int32(0),
                         "$lastMessage.unreadCount"
                     ]],
-                    "image" : 1,
-                    "imageURL" : 1,
-                    "profileImage": "$users.profileImage",
+                    "image": "$otherUsers.profileImage",
+                    "imageURL": "$otherUsers.profileImage",
+                    "profileImage": "$otherUsers.profileImage",
                     "participantCount": [
                         "$size": [
                             "$filter" : [
